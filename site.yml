@@ -23,6 +23,7 @@
 - hosts: all
   roles:
     - docker
+    - { role: weave, when: weave_enabled|bool }
 
 - hosts: masters
   roles:
