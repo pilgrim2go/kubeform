@@ -1,5 +1,4 @@
 #cloud-config
-
 coreos:
   etcd2:
     proxy: on
@@ -45,7 +44,6 @@ coreos:
             After=flanneld.service
             Requires=flanneld.service
             Restart=always
-            Restart=on-failure
     - name: etcd2.service
       command: start
   update:
@@ -70,8 +68,5 @@ write_files:
   - path: /etc/ssl/etcd/private/etcd.pem
     permissions: 0644
     content: "${etcd_key}"
-  - path: /etc/kubernetes/ssl/ca.pem
-    permissions: 0644
-    content: "${kubernetes_ca}"
 manage_etc_hosts: localhost
 role: workers

@@ -13,7 +13,7 @@ api_servers_group: masters
 kubernetes_image: quay.io/coreos/hyperkube
 
 # The docker container version to use for Kubernetes
-kubernetes_version: v1.1.8_coreos.0
+kubernetes_version: v1.2.4_coreos.1
 
 # Kubernetes log level. uses glog. See https://github.com/golang/glog
 # 0 - Generally useful for this to ALWAYS be visible to an operator
@@ -70,6 +70,7 @@ kubernetes_config_dir: /etc/kubernetes
 kubernetes_script_dir: /srv/kubernetes
 kubernetes_cert_dir: "{{ kubernetes_config_dir }}/ssl"
 kubernetes_manifest_dir: "{{ kubernetes_config_dir }}/manifests"
+kubernetes_addons_dir: "{{ kubernetes_config_dir }}/addons"
 kubernetes_users_dir: "{{ kubernetes_config_dir }}/users"
 kubernetes_podmaster_dir: "{{ kubernetes_script_dir }}/manifests"
 
@@ -79,3 +80,12 @@ enable_monitoring: false
 
 # DNS domain for SkyDNS + Kubelet
 dns_domain: cluster.local
+
+# Toggle for cloud provider support for Kubelet
+enable_cloud_provider: false
+
+# Choose a specific ingress-controller. Supported:
+# - traefik
+# - nginx - Coming soon...
+# - vamp - Coming soon...
+ingress_controller: "traefik"

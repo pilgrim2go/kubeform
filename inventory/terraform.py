@@ -83,12 +83,6 @@ def calculate_mi_vars(func):
     def inner(*args, **kwargs):
         name, attrs, groups = func(*args, **kwargs)
 
-        # attrs
-        if attrs.get('role', '') == 'control':
-            attrs['consul_is_server'] = True
-        else:
-            attrs['consul_is_server'] = False
-
         # groups
         if attrs.get('publicly_routable', False):
             groups.append('publicly_routable')
@@ -170,8 +164,8 @@ def openstack_host(resource, module_name):
         'region': raw_attrs.get('region', ''),
         'security_groups': parse_list(raw_attrs, 'security_groups'),
         #ansible
-        'ansible_ssh_port': 22,
-        'ansible_ssh_user': 'centos',
+        'ansible_port': 22,
+        'ansible_user': 'centos',
         # workaround for an OpenStack bug where hosts have a different domain
         # after they're restarted
         'host_domain': 'novalocal',
@@ -180,11 +174,11 @@ def openstack_host(resource, module_name):
 
     try:
         attrs.update({
-            'ansible_ssh_host': raw_attrs['access_ip_v4'],
+            'ansible_host': raw_attrs['access_ip_v4'],
             'publicly_routable': True,
         })
     except (KeyError, ValueError):
-        attrs.update({'ansible_ssh_host': '', 'publicly_routable': False})
+        attrs.update({'ansible_host': '', 'publicly_routable': False})
 
     # attrs specific to microservices-infrastructure
     attrs.update({
@@ -236,9 +230,10 @@ def aws_host(resource, module_name):
         'vpc_security_group_ids': parse_list(raw_attrs,
                                              'vpc_security_group_ids'),
         # ansible-specific
-        'ansible_ssh_port': 22,
-        'ansible_ssh_user': raw_attrs.get('tags.sshUser', 'ubuntu'),
-        'ansible_ssh_host': _get_ignore_blank(raw_attrs, 'public_ip', raw_attrs['private_ip']),
+        'ansible_port': 22,
+        'ansible_user': raw_attrs.get('tags.sshUser', 'core'),
+        'ansible_host': _get_ignore_blank(raw_attrs, 'public_ip', raw_attrs['private_ip']),
+        'provider': 'aws'
     }
 
     # attrs specific to microservices-infrastructure
@@ -278,15 +273,14 @@ def digitalocean_host(resource, tfvars=None):
         'region': raw_attrs['region'],
         'size': raw_attrs['size'],
         # ansible
-        'ansible_ssh_port': 22,
+        'ansible_port': 22,
         # Could be passed from the command line via environment variable
-        'ansible_ssh_user': 'core',
-        'ansible_ssh_host': raw_attrs['ipv4_address'],
+        'ansible_user': 'core',
+        'ansible_host': raw_attrs['ipv4_address'],
+        'provider': 'digitalocean',
     }
 
-    # attrs specific to microservices-infrastructure
     attrs.update({
-        'consul_dc': _clean_dc(attrs['metadata'].get('dc', attrs['region'])),
         'role': attrs['metadata'].get('role', 'none')
     })
 
@@ -295,7 +289,6 @@ def digitalocean_host(resource, tfvars=None):
 
     groups.append('region=' + attrs['region'])
     groups.append('role=' + attrs['role'])
-    groups.append('dc=' + attrs['consul_dc'])
 
     return name, attrs, groups
 
@@ -329,8 +322,9 @@ def gce_host(resource, module_name):
         'tags': parse_list(raw_attrs, 'tags'),
         'zone': raw_attrs['zone'],
         # ansible
-        'ansible_ssh_port': 22,
-        'ansible_ssh_user': 'deploy',
+        'ansible_port': 22,
+        'ansible_user': 'deploy',
+        'provider': 'gce',
     }
 
     # attrs specific to microservices-infrastructure
@@ -341,11 +335,11 @@ def gce_host(resource, module_name):
 
     try:
         attrs.update({
-            'ansible_ssh_host': interfaces[0]['access_config'][0]['nat_ip'],
+            'ansible_host': interfaces[0]['access_config'][0]['nat_ip'],
             'publicly_routable': True,
         })
     except (KeyError, ValueError):
-        attrs.update({'ansible_ssh_host': '', 'publicly_routable': False})
+        attrs.update({'ansible_host': '', 'publicly_routable': False})
 
     # add groups based on attrs
     groups.extend('gce_image=' + disk['image'] for disk in attrs['disks'])
@@ -394,9 +388,10 @@ def azure_host(resource, module_name):
         'virtual_network': raw_attrs.get('virtual_network'),
         'endpoint': parse_attr_list(raw_attrs, 'endpoint'),
         # ansible
-        'ansible_ssh_port': 22,
-        'ansible_ssh_user': raw_attrs['username'],
-        'ansible_ssh_host': raw_attrs.get('vip_address', raw_attrs['ip_address']),
+        'ansible_port': 22,
+        'ansible_user': raw_attrs['username'],
+        'ansible_host': raw_attrs.get('vip_address', raw_attrs['ip_address']),
+        'provider': 'azure',
     }
 
     # attrs specific to microservices-infrastructure
