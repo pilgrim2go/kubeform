@@ -51,7 +51,7 @@ module "aws-keypair" {
 
 # certificates
 module "ca" {
-  source            = "github.com/Capgemini/tf_tls/ca"
+  source            = "github.com/Capgemini/tf_tls//ca"
   organization      = "${var.organization}"
   ca_count          = "${var.masters + var.workers + var.edge-routers}"
   deploy_ssh_hosts  = "${concat(aws_instance.edge-router.*.public_ip, concat(aws_instance.master.*.public_ip, aws_instance.worker.*.public_ip))}"
@@ -60,13 +60,13 @@ module "ca" {
 }
 
 module "etcd_cert" {
-  source             = "github.com/Capgemini/tf_tls/etcd"
+  source             = "github.com/Capgemini/tf_tls//etcd"
   ca_cert_pem        = "${module.ca.ca_cert_pem}"
   ca_private_key_pem = "${module.ca.ca_private_key_pem}"
 }
 
 module "kube_master_certs" {
-  source                = "github.com/Capgemini/tf_tls/kubernetes/master"
+  source                = "github.com/Capgemini/tf_tls/kubernetes//master"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
   ip_addresses          = "${concat(aws_instance.master.*.private_ip, aws_instance.master.*.public_ip)}"
@@ -80,7 +80,7 @@ module "kube_master_certs" {
 }
 
 module "kube_kubelet_certs" {
-  source                = "github.com/Capgemini/tf_tls/kubernetes/kubelet"
+  source                = "github.com/Capgemini/tf_tls/kubernetes//kubelet"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
   ip_addresses          = "${concat(aws_instance.edge-router.*.private_ip, concat(aws_instance.master.*.private_ip, aws_instance.worker.*.private_ip))}"
@@ -93,14 +93,14 @@ module "kube_kubelet_certs" {
 }
 
 module "kube_admin_cert" {
-  source                = "github.com/Capgemini/tf_tls/kubernetes/admin"
+  source                = "github.com/Capgemini/tf_tls/kubernetes//admin"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
   kubectl_server_ip     = "${module.master_elb.elb_dns_name}"
 }
 
 module "docker_daemon_certs" {
-  source                = "github.com/Capgemini/tf_tls/docker/daemon"
+  source                = "github.com/Capgemini/tf_tls/docker//daemon"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
   ip_addresses_list     = "${concat(aws_instance.edge-router.*.private_ip, concat(aws_instance.master.*.private_ip, aws_instance.worker.*.private_ip))}"
@@ -113,7 +113,7 @@ module "docker_daemon_certs" {
 }
 
 module "docker_client_certs" {
-  source                = "github.com/Capgemini/tf_tls/docker/client"
+  source                = "github.com/Capgemini/tf_tls/docker//client"
   ca_cert_pem           = "${module.ca.ca_cert_pem}"
   ca_private_key_pem    = "${module.ca.ca_private_key_pem}"
   ip_addresses_list     = "${concat(aws_instance.edge-router.*.private_ip, concat(aws_instance.master.*.private_ip, aws_instance.worker.*.private_ip))}"

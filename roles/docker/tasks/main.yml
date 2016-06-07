@@ -21,11 +21,18 @@
   become: yes
   become_user: root
   template:
-    src: docker.service.j2
-    dest: /etc/systemd/system/docker.service
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
   notify:
     - reload systemd
     - restart docker
+  with_items:
+    - src: docker.service.j2
+      dest: /etc/systemd/system/docker.service
+    - src: policy.json.j2
+      dest: "{{ docker_policy_file }}"
+    - src: authz-broker.service.j2
+      dest: /etc/systemd/system/authz-broker.service
   tags:
     - docker
 
@@ -33,6 +40,15 @@
   become: yes
   service:
     name: docker
+    state: started
+    enabled: yes
+  tags:
+    - docker
+
+- name: ensure authz-broker is running (and enable it at boot)
+  become: yes
+  service:
+    name: authz-broker
     state: started
     enabled: yes
   tags:
