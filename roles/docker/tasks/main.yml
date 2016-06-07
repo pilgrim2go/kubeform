@@ -51,5 +51,6 @@
     name: authz-broker
     state: started
     enabled: yes
+  when: docker_authz|bool
   tags:
     - docker
