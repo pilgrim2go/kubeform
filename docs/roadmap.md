@@ -27,15 +27,16 @@ Features
 - [ ] Monitoring and alerts(nodes/services)
 - [ ] Logging (nodes/services)
 - [ ] Distributed File storage (for nodes/services)
-- [ ] Ingress Load balancing
+- [x] Ingress Load balancing
 - [ ] Private registry
+- [ ] Cluster federation with Ubernetes 
 - [ ] Kubernetes maintenance
 
 Security
 --------
 - [ ] Certs for all services
 - [ ] Lets encrypt support
-- [ ] IAM
+- [ ] IAM (IaaS & Platform)
 - [ ] Vault
 - [ ] Service Accounts & Security Contexts
 - [ ] Networking Policy
