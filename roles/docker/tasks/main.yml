@@ -8,6 +8,13 @@
   tags:
     - docker
 
+- name: Creates authz-broker directory
+  become: yes
+  become_user: root
+  file:
+    path: "{{ docker_policy_dir }}"
+    state: directory
+
 - name: setup private docker registry credentials
   become: yes
   when: private_docker_registry|bool
@@ -30,11 +37,21 @@
     - src: docker.service.j2
       dest: /etc/systemd/system/docker.service
     - src: policy.json.j2
-      dest: "{{ docker_policy_file }}"
+      dest: "{{ docker_policy_dir }}/policy.json"
     - src: authz-broker.service.j2
       dest: /etc/systemd/system/authz-broker.service
   tags:
     - docker
+
+- name: touch subuid and subgid files
+  become: yes
+  become_user: root
+  file: 
+    path: "{{ item }}"
+    state: touch
+  with_items:
+    - /etc/subuid
+    - /etc/subgid
 
 - name: ensure docker is running (and enable it at boot)
   become: yes
@@ -51,6 +68,6 @@
     name: authz-broker
     state: started
     enabled: yes
-  when: docker_authz|bool
+  when: docker_authz_enabled|bool
   tags:
     - docker
